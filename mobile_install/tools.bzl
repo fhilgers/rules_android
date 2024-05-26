@@ -37,7 +37,7 @@ TOOL_ATTRS = dict(
         ),
     ),
     _studio_deployer = attr.label(
-        default = "//tools/android:gen_fail", # TODO(#119): Studio deployer jar to be released
+        default = "@androidstudio//:deployer_deploy.jar",
         allow_single_file = True,
         cfg = "exec",
         executable = True,

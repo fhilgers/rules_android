@@ -8,12 +8,13 @@ bazel_dep(name = "rules_license", version = "0.0.4")
 bazel_dep(name = "rules_java", version = "7.5.0")
 
 bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True)
+
 # Use a later commit until a version with table of contents, stamping, and
 # footer template is released.
 git_override(
     module_name = "stardoc",
-    remote = "https://github.com/bazelbuild/stardoc.git",
     commit = "91428abe5bce5517310dbbfe08b68a2d6ca529f8",
+    remote = "https://github.com/bazelbuild/stardoc.git",
 )
 
 rules_java_toolchains = use_extension("@rules_java//java:extensions.bzl", "toolchains")
@@ -60,6 +61,7 @@ bazel_dep(name = "rules_proto", version = "5.3.0-21.7", repo_name = "rules_proto
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
     name = "rules_android_maven",
+    aar_import_bzl_label = "@rules_android//rules:rules.bzl",
     artifacts = [
         "androidx.privacysandbox.tools:tools:1.0.0-alpha06",
         "androidx.privacysandbox.tools:tools-apigenerator:1.0.0-alpha06",
@@ -72,7 +74,7 @@ maven.install(
         "com.android.tools:desugar_jdk_libs_configuration_minimal:2.0.4",
         "com.android.tools:desugar_jdk_libs_nio:2.0.4",
         "com.android.tools:desugar_jdk_libs_configuration_nio:2.0.4",
-        "com.android.tools.build:gradle:8.2.0-alpha15",
+        "com.android.tools.build:gradle:8.4.0",
         "org.bouncycastle:bcprov-jdk18on:1.77",
         "org.hamcrest:hamcrest-core:2.2",
         "org.robolectric:robolectric:4.10.3",
@@ -82,15 +84,14 @@ maven.install(
         "info.picocli:picocli:4.7.4",
         "junit:junit:4.13.2",
     ],
+    # To generate, run:
+    # REPIN=1 bazelisk run --enable_bzlmod @rules_android_maven//:pin
+    lock_file = "//:rules_android_maven_install.json",
     repositories = [
         "https://maven.google.com",
         "https://repo1.maven.org/maven2",
     ],
-    # To generate, run:
-    # REPIN=1 bazelisk run --enable_bzlmod @rules_android_maven//:pin
-    lock_file = "//:rules_android_maven_install.json",
     use_starlark_android_rules = True,
-    aar_import_bzl_label = "@rules_android//rules:rules.bzl",
 )
 use_repo(
     maven,
@@ -126,11 +127,22 @@ use_repo(apksig_extension, "apksig")
 
 # To include PR #92
 git_override(
-  module_name = "rules_robolectric",
-  remote = "https://github.com/robolectric/robolectric-bazel",
-  commit = "a5b25a8c27cc6add74bb01e62cd0dc72df8933ff",
+    module_name = "rules_robolectric",
+    commit = "a5b25a8c27cc6add74bb01e62cd0dc72df8933ff",
+    remote = "https://github.com/robolectric/robolectric-bazel",
 )
 
 android_sdk_repository_extension = use_extension("//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
 use_repo(android_sdk_repository_extension, "androidsdk")
+
 register_toolchains("@androidsdk//:sdk-toolchain", "@androidsdk//:all")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "androidstudio",
+    build_file = "androidstudio.BUILD.bazel",
+    integrity = "sha256-E50Nu0kJNTto+/VcCbbTGjRRIESp1PAs4PGprMyhKPk=",
+    strip_prefix = "android-studio",
+    urls = ["https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.28/android-studio-2023.1.1.28-linux.tar.gz"],
+)
