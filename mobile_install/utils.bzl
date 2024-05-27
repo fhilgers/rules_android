@@ -162,7 +162,7 @@ def dex(ctx, jar, out_dex_shards, deps = None, desugar = True):
         args.add("-android_jar", first(ctx.files._android_sdk))
         if deps:
             args.add_joined("-classpath", deps, join_with = ",")
-        args.add("-desugar_core_libs", "True")
+        args.add("-desugar_core_libs", "False")
     args.add("-dexbuilder", ctx.executable._dexbuilder)
     args.add("-min_sdk_version", min_sdk)
     args.add("-in", jar)
